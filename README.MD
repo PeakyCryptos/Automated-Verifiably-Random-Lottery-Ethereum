@@ -1,7 +1,8 @@
-# Automated Truly Random Lottery Ethereum
+# Automated Verifiably Random Lottery Ethereum
 
 ## Intro
-This is a lottery on Ethereum which is automated using Chainlink Keepers. It employs a weighted system for determining the winner. Which is achieved by input provided from a Chainlink Data Feed oracle for the USD price of ETH at time of entry. Furtheremore, it produces a truly random result, as opposed to a pseudorandom approach. As it uses Chainlink VRFV2 to generate random numbers for the settlement process. The winner of the lottery receives the sum of funds that users have paid to enter. I spun up a simple interface in React that you can interact with [here](https://automatedtrulyrandomlottery.herokuapp.com/)(Must be using metamask extension or equivalent). In this instance of the contract the interval is set to 180(3 minutes). See the lottery settlement selection below for more information on this. I have also provided well documented comments in the solidity code that I recommend you check out :)
+
+This is a lottery on Ethereum which is automated using Chainlink Keepers. It employs a weighted system for determining the winner, which is achieved by input provided from a Chainlink Data Feed oracle for the USD price of ETH at time of entry. Furtheremore, it produces a verifiably random result, as opposed to a pseudorandom approach that could be gamed. As it uses Chainlink VRFV2 to generate random numbers for the settlement process. The winner of the lottery receives the sum of funds that users have paid to enter. I spun up a simple interface in React that you can interact with [here](https://automatedtrulyrandomlottery.herokuapp.com/)(Must be using metamask extension or equivalent). In this instance of the contract the interval is set to 180(3 minutes). See the lottery settlement selection below for more information on this. I have also provided well documented comments in the solidity code that I recommend you check out :)
 
 ## Detailed Execution Flow
 
@@ -37,7 +38,7 @@ rawfulfillRandomWords invokes fulfillRandomWords which calls pickWinner(). Withi
 ![Lottery Settlement](https://i.ibb.co/rcH1C8S/settlement-Process-drawio.png)
 
 ## Weakness
-When two random numbers are used to select the two indexes it is a truly random process. Furthermore, between the two players the one that entered more value into the lottery will always have greater odds. Despite this, if one was to have multiple entires into the lottery (be it same account or alts) then there exists a chance that those two indexes resolve to the same player. Initially I wanted to solve this by employing the algorithm specified [here](https://stackoverflow.com/questions/1761626/weighted-random-numbers):
+When two random numbers are used to select the two indexes it is a verifiably random process. Furthermore, between the two players the one that entered more value into the lottery will always have greater odds. Despite this, if one was to have multiple entires into the lottery (be it same account or alts) then there exists a chance that those two indexes resolve to the same player. Initially I wanted to solve this by employing the algorithm specified [here](https://stackoverflow.com/questions/1761626/weighted-random-numbers):
 
 ```
 int rnd = random(sum_of_weight);
