@@ -1,4 +1,4 @@
-# Automated Verifiably Random Lottery Ethereum
+# Automated Verifiably Random Lottery Ethereum TEST
 
 ## Intro
 
