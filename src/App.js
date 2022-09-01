@@ -47,7 +47,7 @@ class App extends Component {
 
   render() {
     return (
-      <div className='AppContainer'>
+      <div class="container">
         <h2>Lottery Contract</h2>
         <p>
         The are currently {this.state.totalPlayers} players, competing for {web3.utils.fromWei(this.state.balance, 'ether')} ethereum!
