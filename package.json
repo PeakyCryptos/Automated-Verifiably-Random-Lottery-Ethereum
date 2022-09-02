@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "assert": "^2.0.0",
     "bootstrap": "^5.2.0",
+    "bootstrap5": "^1.1.9",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
     "https-browserify": "^1.0.0",
