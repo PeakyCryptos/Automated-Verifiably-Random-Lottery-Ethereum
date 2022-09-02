@@ -47,7 +47,7 @@ class App extends Component {
 
   render() {
     return (
-      <div class="col-md-3 w-50 mx-auto text-center position-absolute top-50 start-50 translate-middle card card-body text-bg-secondary mb-3">
+      <div class="col-md-3 w-50 mx-auto text-center position-absolute top-50 start-50 translate-middle card card-body text-bg-secondary mb-3" id="container">
         <h2 class="card-title">Lottery Contract</h2>
         <p class="card-text">
         The are currently {this.state.totalPlayers} players, competing for {web3.utils.fromWei(this.state.balance, 'ether')} ethereum!
