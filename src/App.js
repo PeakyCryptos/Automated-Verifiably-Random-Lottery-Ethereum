@@ -47,7 +47,7 @@ class App extends Component {
 
   render() {
     return (
-      <div class="d-grid container text-center card card-body">
+      <div class="col-md-3 w-50 mx-auto text-center position-absolute top-50 start-50 translate-middle card card-body text-bg-secondary mb-3">
         <h2 class="card-title">Lottery Contract</h2>
         <p class="card-text">
         The are currently {this.state.totalPlayers} players, competing for {web3.utils.fromWei(this.state.balance, 'ether')} ethereum!
@@ -63,13 +63,12 @@ class App extends Component {
         <form onSubmit={this.onSubmit}>
           <h4>Want to try your luck? (minimum of $10)</h4>
           <div>
-            <label>Amount of ether to enter:</label>
-            <input
+            <input type="number" class="w-25 p-1 mx-auto text-center form-control" id="FormControlInput" placeholder="Amount of ether to enter"
             value={this.state.entryValue} 
             onChange={event => this.setState( { entryValue: event.target.value })} 
         />
           </div><br></br>
-          <button class="btn btn-outline-secondary">Enter</button>
+          <button class="btn btn-dark">Enter</button>
         </form>
         <hr />
         <div>
