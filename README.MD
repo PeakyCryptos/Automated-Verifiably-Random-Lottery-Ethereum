@@ -1,4 +1,3 @@
-# UPSTREAM branch
 ## Automated Verifiably Random Lottery Ethereum
 
 ## Intro
