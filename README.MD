@@ -1,6 +1,6 @@
 ## Automated Verifiably Random Lottery Ethereum
 
-Smart Contract, and React App developed by Suthan Somadeva
+Smart Contract, and React App developed by Suthan Somadeva \
 Styling done by Asvin Aravinthan
 
 ## Intro
