@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity 0.8.16;
 
 // Chainlink VRFV2 Contracts (RNG)
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol"; 
