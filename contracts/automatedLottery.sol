@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 // Chainlink VRFV2 Contracts (RNG)
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol"; 
@@ -8,11 +8,10 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 // Chainlink Data Feed Interface
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol"; 
 
-/*
-Chainlink Keepers 
-KeeperCompatible.sol imports the functions from both ./KeeperBase.sol and
-./interfaces/KeeperCompatibleInterface.sol 
-*/
+/** Chainlink Keepers 
+ *  KeeperCompatible.sol imports the functions from both ./KeeperBase.sol and
+ *  ./interfaces/KeeperCompatibleInterface.sol 
+ */
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 /** 
@@ -26,32 +25,38 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     VRFCoordinatorV2Interface COORDINATOR;
 
     // Initalizes Data Feed interface
-    AggregatorV3Interface internal priceFeed; // Data Feed
+    AggregatorV3Interface internal priceFeed;
 
-    // object generated for each lottery participant
+     /** object generated for each lottery participant.
+      *  1 weight = $1 at time of entry based on chainlink data feed (ex. $100 = 100 weight).   
+      */ 
      struct Player {
-        // 1 weight = $1 at time of entry based on chainlink data feed (ex. $100 = 100 weight)
         uint weight;
-        // address of player 
         address playerAddress; 
     }
 
     // Lottery Variables ------------------------------------------------
+
     // index maps to a player object
     Player[] public players; 
+
     // # of current players in the lottery session
     uint public totalPlayers;
+
     // latest lottery winner 
     address payable public currWinner; 
+
     // State of the lottery {true, false}
     bool lotteryOpen; 
+
     // stores random numbers
     uint256[] public randomResult; 
     //-------------------------------------------------------------------
     
     // Keeper vars------------------------------------------------------
-    // timeKeeper (activated when 2 players enter the lottery)
-    // block.time >= timeKeeper + interval = keeper call of performUpKeep
+    /** TimeKeeper (activated when 2 players enter the lottery).
+     *  Block.time >= timeKeeper + interval = keeper call of performUpKeep.
+     */ 
     uint public immutable interval; 
     uint public timeKeeper;
     //------------------------------------------------------------------
@@ -59,19 +64,27 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     /// Chainlink VRF Initiliazation-------------------------------------	
     // Returns a random number from a chainlink node and verifies it's integrity
     address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
+
     // Subscription number tied to the account that is funding the VRFV2 service
     uint64 subscriptionId;
+
     // Request number assigned to the current/previous random number call
     uint256 public s_requestId;
-    // Using the 30gwei key hash
-    // This specifies the max gas used for the random number request
-    // if that gas price is above this then there will be no random numbers recieved
-    bytes32 public keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // 30gwei hash
-    // max gas uints for calling fulfillRandomWords() used by coordinator
-    // if over this amount then call is reverted
+
+    /** Using the 30gwei key hash.
+     *  This specifies the max gas used for the random number request.
+     *  If that gas price is above this then there will be no random numbers recieved.
+     */ 
+    bytes32 public keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
+
+    /** Max gas uints for calling fulfillRandomWords() used by coordinator.
+     *  If over this amount then call is reverted
+     */ 
     uint32 callbackGasLimit = 300000; 
+
     // minimum confirmations for random number request to be recieved
     uint16 requestConfirmations = 3;
+
     // amount of random numbers that will be requested 
     uint32 numWords =  3; 
     //------------------------------------------------------------------	
@@ -104,8 +117,8 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     /** 
-     *  @dev Allows users to enter the lottery
-     *  @dev Checks minimum value passed in to enter is greater than $10
+     *  @dev Allows users to enter the lottery.
+     *       Checks minimum value passed in to enter is greater than $10.
      */
     function enter() public payable {
         // Stops players from entering if the winner selection process has been initiated
@@ -149,8 +162,8 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /** 
      *  @dev Initates the VRFV2 random numbers request
-     *  @dev If call is succesful, the VRF coordinator will call rawfulfillRandomWords 
-     *  @dev Only performUpKeep calls this as it's an internal function
+     *       If call is succesful, the VRF coordinator will call rawfulfillRandomWords 
+     *       Only performUpKeep calls this as it's an internal function
      */
     function concludeLottery() internal { 
         // Will revert if subscription is not set and funded. 
@@ -165,9 +178,9 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     /** 
-     *  @dev Only VRF coordinator can call rawfulfillRandomWords -> which calls this function
-     *  @dev Recieves the random numbers array from the VRF coodinator
-     *  @dev Initates the call to settle the lottery -> pickWinner()  
+     *  @dev Only VRF coordinator can call rawfulfillRandomWords -> which calls this function.
+     *       Recieves the random numbers array from the VRF coodinator.
+     *       Initates the call to settle the lottery -> pickWinner(). 
      */
     function fulfillRandomWords 
     (
@@ -180,13 +193,14 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /** 
      *  @dev Settles the lottery for the winner
-     *  @dev Reinitalizes the lottery state
+     *       Reinitalizes the lottery state.
      */
     function pickWinner() internal {
-        // Gets 2 random indexes using the first 2 random numbers
-        // Which were stored in randomResult
-        // These numbers are modulos against the count of total players
-        // Produces an index in the range (0,totalPlayers-1)       
+        /** Gets 2 random indexes using the first 2 random numbers.
+         * Which were stored in randomResult.
+         * These numbers are modulos against the count of total players.
+         * Produces an index in the range (0,totalPlayers-1).
+         */    
         uint playerOneIndex = randomResult[0] % totalPlayers;
         uint playerTwoIndex = randomResult[1] % totalPlayers;
 
@@ -196,9 +210,11 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
         // gets the total sum of their weights
         uint weight =  playerOne.weight + playerTwo.weight;
-        // Settler is a random number used to apply weighted randomness
-        // Using the 3rd random number stored in randomResult
-        // Produces a number in the range of (0, weight-1) 
+
+        /** Settler is a random number used to apply weighted randomness.
+         *  Using the 3rd random number stored in randomResult.
+         *  Produces a number in the range of (0, weight-1).
+         */ 
         uint settler = randomResult[2] % weight; 
 
         // Weighted randomness using the generated weight
@@ -208,22 +224,21 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
             currWinner = payable(playerTwo.playerAddress); 
         }
 
+        // Reinitalize lottery
+        delete players; 
+        totalPlayers = 0;
+        lotteryOpen = true; 
+
         // Transfer all funds to winner
         currWinner.transfer(address(this).balance); 
-
-        // Reinitalize lottery
-        delete players; // clear existing 
-        totalPlayers = 0;
-        lotteryOpen = true; // reopen lottery
-
     }
 
     /** 
-     *  @dev This function is called by the chainlink keepers node
-     *  @dev The node simulates this function locally to see if upKeep conditions are met
-     *  @dev If uplink conditions are met performUpKeep is called on-chain
-     *  @dev Upkeep is only needed if there is a valid lottery (2 players in contention)
-     *  @dev Or if the interval is greater than what is specified upon 2 players entering
+     *  @dev This function is called by the chainlink keepers node.
+     *       The node simulates this function locally to see if upKeep conditions are met.
+     *       If uplink conditions are met performUpKeep is called on-chain.
+     *       Upkeep is only needed if there is a valid lottery (2 players in contention).
+     *       Or if the interval is greater than what is specified upon 2 players entering.
      */     
     function checkUpkeep(bytes calldata /*checkData*/) external view override returns (bool upkeepNeeded, bytes memory /*performData*/) {
         if  (timeKeeper != 0 
@@ -239,8 +254,8 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     /** 
-     *  @dev Called by Chainlink Keepers node if upkeep conditions met
-     *  @dev Initiates lottery conclusion process     
+     *  @dev Called by Chainlink Keepers node if upkeep conditions met.
+     *       Initiates lottery conclusion process.     
      */
     function performUpkeep(bytes calldata /*performData*/) external override {
         // if 0 then 2 players haven't entered, or the lottery is finished
