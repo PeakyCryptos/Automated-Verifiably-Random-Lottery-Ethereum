@@ -17,7 +17,7 @@ import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 /** 
  *  @author Suthan Somadeva
  *  @title Automated Lottery w/ Weighted Winner Selection
- *  @dev interface addresses(VRFV2, Data Feed) hardcoded for Rinkeby Network
+ *  @dev interface addresses(VRFV2, Data Feed) hardcoded for Goerli Network
 */
 contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
@@ -63,7 +63,7 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /// Chainlink VRF Initiliazation-------------------------------------	
     // Returns a random number from a chainlink node and verifies it's integrity
-    address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
+    address vrfCoordinator = 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D;
 
     // Subscription number tied to the account that is funding the VRFV2 service
     uint64 subscriptionId;
@@ -71,11 +71,11 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     // Request number assigned to the current/previous random number call
     uint256 public s_requestId;
 
-    /** Using the 30gwei key hash.
+    /** Using the 150 gwei key hash.
      *  This specifies the max gas used for the random number request.
      *  If that gas price is above this then there will be no random numbers recieved.
      */ 
-    bytes32 public keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
+    bytes32 public keyHash = 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15;
 
     /** Max gas uints for calling fulfillRandomWords() used by coordinator.
      *  If over this amount then call is reverted
@@ -89,12 +89,13 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint32 numWords =  3; 
     //------------------------------------------------------------------	
     
-    constructor(uint64 _subscriptionId, uint _interval) 
+    constructor(uint64 _subscriptionId, uint _interval, uint256 _minimumDollars) 
     VRFConsumerBaseV2(vrfCoordinator) 
     {
         // Initalize lottery
         totalPlayers = 0;
         lotteryOpen = true;
+        minimumDollars = _minimumDollars;
 
         // Keeper 
         interval = _interval;
@@ -104,7 +105,7 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         subscriptionId = _subscriptionId;
 
         // Data Feed (ETH/USD) 
-        priceFeed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e); 
+        priceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e); 
     }
 
     /** 
@@ -118,7 +119,7 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /** 
      *  @dev Allows users to enter the lottery.
-     *       Checks minimum value passed in to enter is greater than $10.
+     *  Checks minimum value passed in to enter is greater than $10.
      */
     function enter() public payable {
         // Stops players from entering if the winner selection process has been initiated
@@ -134,7 +135,7 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         // (amt ** price) / 10^26
         uint dollarsPassed = (msg.value * getLatestPrice()) / 10**26; 
         // min entry $10
-        require(dollarsPassed >= 10); 
+        require(dollarsPassed >= minimumDollars); 
 
         // initalize new player with weight and address
         Player memory player = Player(dollarsPassed, address(msg.sender)); 
@@ -162,8 +163,8 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /** 
      *  @dev Initates the VRFV2 random numbers request
-     *       If call is succesful, the VRF coordinator will call rawfulfillRandomWords 
-     *       Only performUpKeep calls this as it's an internal function
+     *  If call is succesful, the VRF coordinator will call rawfulfillRandomWords 
+     *  Only performUpKeep calls this as it's an internal function
      */
     function concludeLottery() internal { 
         // Will revert if subscription is not set and funded. 
@@ -179,8 +180,8 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /** 
      *  @dev Only VRF coordinator can call rawfulfillRandomWords -> which calls this function.
-     *       Recieves the random numbers array from the VRF coodinator.
-     *       Initates the call to settle the lottery -> pickWinner(). 
+     *  Recieves the random numbers array from the VRF coodinator.
+     *  Initates the call to settle the lottery -> pickWinner(). 
      */
     function fulfillRandomWords 
     (
@@ -235,10 +236,10 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     /** 
      *  @dev This function is called by the chainlink keepers node.
-     *       The node simulates this function locally to see if upKeep conditions are met.
-     *       If uplink conditions are met performUpKeep is called on-chain.
-     *       Upkeep is only needed if there is a valid lottery (2 players in contention).
-     *       Or if the interval is greater than what is specified upon 2 players entering.
+     *  The node simulates this function locally to see if upKeep conditions are met.
+     *  If uplink conditions are met performUpKeep is called on-chain.
+     *  Upkeep is only needed if there is a valid lottery (2 players in contention).
+     *  Or if the interval is greater than what is specified upon 2 players entering.
      */     
     function checkUpkeep(bytes calldata /*checkData*/) external view override returns (bool upkeepNeeded, bytes memory /*performData*/) {
         if  (timeKeeper != 0 
@@ -254,7 +255,7 @@ contract automatedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     /** 
-     *  @dev Called by Chainlink Keepers node if upkeep conditions met.
+     *       @dev Called by Chainlink Keepers node if upkeep conditions met.
      *       Initiates lottery conclusion process.     
      */
     function performUpkeep(bytes calldata /*performData*/) external override {

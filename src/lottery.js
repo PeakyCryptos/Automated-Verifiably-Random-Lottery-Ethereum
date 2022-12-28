@@ -1,6 +1,8 @@
 import web3 from './web3';
 
-const address = '0x5334D3AF028421dD838fE995368e1ae1b8a6e35a';
+// MODIFY TO USE YOUR DEPLOYED INSTANCE
+const address = '';
+
 const abi = [
 	{
 		"inputs": [],
