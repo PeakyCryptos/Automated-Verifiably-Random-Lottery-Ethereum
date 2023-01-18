@@ -17,7 +17,7 @@ The constructor takes two arguments. "\_subscriptionId" which is the identifer f
 
 A player is expected to call the "enter" function. This function requires that the lottery state be set to open, and that the value of the ethereum they are passing in is greater than the constructor defined 'minimumDolars'. Which is determined by a call to a Chainlink USD/ETH Data Feed Contract.
 
-When the [Chainlink Data Feed](https://docs.chain.link/docs/using-chainlink-reference-contracts/) returns the price, it does so as the value(10\*\*8). This is done because Solidity does not have capability for floating point numbers. The dollars passed is checked by running the calculation (amt passed in * ETH price) / 10\*\*26. Division by 10\*\*26 is because amt passed(msg.value) is always in the units of wei, which is 10\*\*18 of 1 ether. Thus, 10\*\*8 * 10\*\*18 = 10\*\*26.
+When the [Chainlink Data Feed](https://docs.chain.link/docs/using-chainlink-reference-contracts/) returns the price, it does so as the value(10\*\*8). This is done because Solidity does not have capability for floating point numbers. The dollars passed is checked by running the calculation (amt passed in _ ETH price) / 10\*\*26. Division by 10\*\*26 is because amt passed(msg.value) is always in the units of wei, which is 10\*\*18 of 1 ether. Thus, 10\*\*8 _ 10\*\*18 = 10\*\*26.
 
 If both conditions are met then a new player object is initalized and stored in a struct which contains their weight(dollars passed in), and address. This struct is then stored in a players array.
 
@@ -64,7 +64,7 @@ However, this would be unfeasible gas wise, as if there was a large amount of pl
 
 Generate optimized build:
 
-Make sure to change the hardcoded contract address for the frontend in src/lottery.js 
+Make sure to change the hardcoded contract address for the frontend in src/lottery.js
 
 ```
 npm run build
@@ -78,30 +78,27 @@ serve -s build
 
 ## Notes for Deploying Your Own Instance
 
-1. The flattened lottery contract provided has been optimized using default settings (200)
-
-2. You must deploy using the flattened contract, as to set up a chainlink keepers upkeep the contract
-   must be verified on etherscan (or pass in the abi)
-
-3. You get a '\_subscriptionId' by creating a subscription to the [VRFV2 Service](https://vrf.chain.link/)
+1. You get a '\_subscriptionId' by creating a subscription to the [VRFV2 Service](https://vrf.chain.link/)
    Do not forget to whitelist the address of you contract under said subscription:
    url:
 
    ```
-   https://vrf.chain.link/rinkeby/{Your_SubscriptionID}
+   https://vrf.chain.link/goerli/{Your_SubscriptionID}
 
    ```
 
-   ![VRFV2](https://i.ibb.co/7VhQCmG/Capture.jpg)
+![VRFV2](https://i.ibb.co/7VhQCmG/Capture.jpg)
 
-4. Edit the lottery.js file under ./src with your contracts address, and ABI (Remember to use the ABI of the flattened contract not the base file as this is what you deployed)
+2. Deploy the contract initalizing it with the interval (time in seconds to call performUpKeep), minimumDollars which is the minimum entry fee for the lottery, and subscriptionID that you received from the VRFV2 registration
 
-5. [Register](https://keepers.chain.link/rinkeby) a new upkeep so that automation can occur
+3. [Register](https://keepers.chain.link/goerli) a new upkeep so that automation can occur
    Use custom logic under trigger mechanism (use gas limit of at least 150,000)
 
    ![Keeper](https://i.ibb.co/BKNq1w5/Capture2.jpg)
 
-6. If both these services are not kept properly funded with LINK they will not process your
+4. Edit the lottery.js file under ./src with your contracts address, and ABI
+
+5. If both these services are not kept properly funded with LINK they will not process your
    requests. See more in the resources below
 
 ## Plans for Future
